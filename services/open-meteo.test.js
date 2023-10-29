@@ -1,11 +1,18 @@
-import test, { beforeEach, describe, mock } from "node:test";
+import test, { afterEach, beforeEach, describe, mock } from "node:test";
 import assert from "node:assert/strict";
 import { OpenMeteo } from "./open-meteo.js";
 
 describe("OpenMeteo", () => {
+  const httpClient = {
+    async get() {},
+  };
   let client;
   beforeEach(() => {
-    client = new OpenMeteo();
+    client = new OpenMeteo(httpClient);
+  });
+
+  afterEach(() => {
+    mock.restoreAll();
   });
 
   describe("getCurrentWeatherByCoordinates()", () => {
@@ -13,14 +20,14 @@ describe("OpenMeteo", () => {
       const time = dateRounded(new Date());
       const expectedTemperature = 21;
 
-      mockFetchOnce({
-        body: {
-          current_weather: {
-            temperature: expectedTemperature,
-            time,
-          },
+      const responseBody = {
+        current_weather: {
+          temperature: expectedTemperature,
+          time,
         },
-      });
+      };
+
+      mock.method(httpClient, "get", async () => responseBody);
 
       const weather = await client.getCurrentWeatherByCoordinates(
         "49.2328",
@@ -32,46 +39,19 @@ describe("OpenMeteo", () => {
     });
 
     test("should throw an error if server returns non-200 status code", async () => {
-      mockFetchOnce({ status: 500 });
+      mock.method(httpClient, "get", async () => {
+        throw new Error("could not fetch data");
+      });
 
       await assert.rejects(
         () => client.getCurrentWeatherByCoordinates("49.2328", "28.4816"),
         {
-          message: "could not fetch weather data",
-        },
-      );
-    });
-
-    test("should throw an error if failed to fetch", async () => {
-      const expectedError = new Error("failed to fetch");
-      mockFetchOnce({ error: expectedError });
-
-      await assert.rejects(
-        () => client.getCurrentWeatherByCoordinates("49.2328", "28.4816"),
-        {
-          message: "could not fetch weather data",
-          cause: expectedError,
+          message: "could not fetch data",
         },
       );
     });
   });
 });
-
-function mockFetchOnce({ error, status, body } = { status: 200 }) {
-  return mock.method(
-    globalThis,
-    "fetch",
-    async () => {
-      if (error) {
-        throw error;
-      }
-      return new Response(JSON.stringify(body), {
-        status: status || 200,
-      });
-    },
-    { times: 1 },
-  );
-}
 
 function dateRounded(date) {
   const newDate = new Date(date);

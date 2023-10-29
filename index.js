@@ -2,10 +2,12 @@ import { parseCommand } from "./parse-command.js";
 import { getCurrentWeather } from "./command/current.js";
 import { OpenMeteo } from "./services/open-meteo.js";
 import { OpenMeteoGeocoding } from "./services/open-meteo-geocoding.js";
+import { HttpClient } from "./lib/http-client.js";
 
 console.log("The Weather CLI App");
 
-const weatherProvider = new OpenMeteo();
+const httpClient = new HttpClient();
+const weatherProvider = new OpenMeteo(httpClient);
 const geocodingProvider = new OpenMeteoGeocoding();
 
 try {
