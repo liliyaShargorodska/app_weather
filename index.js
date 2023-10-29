@@ -6,7 +6,7 @@ console.log("The Weather CLI App");
 try {
   const command = parseCommand(process.argv.slice(2));
   if (command.command === "current") {
-    getCurrentWeather(command.options);
+    await getCurrentWeather(command.options);
   } else {
     throw new Error(`Unknown command: ${command.command}`);
   }
