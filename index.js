@@ -8,7 +8,7 @@ console.log("The Weather CLI App");
 
 const httpClient = new HttpClient();
 const weatherProvider = new OpenMeteo(httpClient);
-const geocodingProvider = new OpenMeteoGeocoding();
+const geocodingProvider = new OpenMeteoGeocoding(httpClient);
 
 try {
   const command = parseCommand(process.argv.slice(2));
