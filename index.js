@@ -1,4 +1,4 @@
-console.log('The Weather CLI App');
+console.log("The Weather CLI App");
 import { parseCommand } from "./parse-command.js";
 
 console.log("The Weather CLI App");

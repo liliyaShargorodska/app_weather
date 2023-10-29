@@ -6,13 +6,15 @@
   "type": "module",
   "scripts": {
     "test": "node --test .",
-    "lint": "eslint .",
+    "lint": "eslint . && prettier -w .",
     "start": "node index.js"
   },
   "author": "",
   "keywords": [],
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^8.52.0"
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3"
   }
 }
