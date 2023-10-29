@@ -10,8 +10,19 @@ export class OpenMeteo {
       url.searchParams.set(key, value);
     }
 
-    const resp = await fetch(url);
-    return await resp.json();
+    try {
+      const resp = await fetch(url);
+      if (resp.status !== 200) {
+        throw new Error(
+          `status code: ${resp.status}, body: ${await resp.text()}`,
+        );
+      }
+      return await resp.json();
+    } catch (e) {
+      const err = new Error(`could not fetch weather data`);
+      err.cause = e;
+      throw err;
+    }
   }
 
   async getCurrentWeatherByCoordinates(lat, long) {
