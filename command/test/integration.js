@@ -1,11 +1,27 @@
-import test, { describe } from "node:test";
+import test, { afterEach, beforeEach, describe } from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 const execFilePromise = promisify(execFile);
 
 describe("Integration tests", () => {
+  beforeEach(async () => {
+    process.env.WEATHER_APPLICATION_DATA = await fs.mkdtemp(
+      path.join(os.tmpdir(), "weather-app-test-"),
+    );
+  });
+
+  afterEach(async () => {
+    await fs.rm(process.env.WEATHER_APPLICATION_DATA, {
+      recursive: true,
+      force: true,
+    });
+    delete process.env.WEATHER_APPLICATION_DATA;
+  });
   describe("current", () => {
     const fixtures = [
       {
@@ -75,5 +91,23 @@ describe("Integration tests", () => {
         }
       });
     });
+  });
+  test("should cache geocoding results", async () => {
+    try {
+      await execFilePromise("node", [
+        "index.js",
+        "current",
+        "--city",
+        "Vinnytsia",
+      ]);
+      const content = await fs.readFile(
+        path.join(process.env.WEATHER_APPLICATION_DATA, "geocode-cache.json"),
+        "utf-8",
+      );
+      const cache = JSON.parse(content);
+      assert.ok(cache["Vinnytsia"]);
+    } catch (err) {
+      assert.fail("Should not throw an error: " + err.message);
+    }
   });
 });
