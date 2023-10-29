@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node --test .",
+    "test": "node --test **/*.test.js",
+    "test:integration": "node --test ./test",
     "lint": "eslint . && prettier -w .",
     "prepare": "husky install",
     "precommit": "eslint . && prettier -c . && npm run test",
