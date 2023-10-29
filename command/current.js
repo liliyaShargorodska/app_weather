@@ -1,5 +1,17 @@
-export async function getCurrentWeather(weatherProvider, { city, lat, long }) {
+export async function getCurrentWeather(
+  weatherProvider,
+  geocodeProvider,
+  { city, lat, long },
+) {
   validate({ city, lat, long });
+  if (city) {
+    const { latitude, longitude, name } =
+      await geocodeProvider.getCoordinatesByCityName(city);
+    lat = latitude;
+    long = longitude;
+    city = name;
+  }
+
   const weather = await weatherProvider.getCurrentWeatherByCoordinates(
     lat,
     long,
