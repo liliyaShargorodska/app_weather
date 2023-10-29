@@ -1,20 +1,9 @@
-export async function getCurrentWeather({ city, lat, long }) {
+export async function getCurrentWeather(weatherProvider, { city, lat, long }) {
   validate({ city, lat, long });
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const url = new URL("https://api.open-meteo.com/v1/forecast");
-  url.searchParams.set("latitude", lat);
-  url.searchParams.set("longitude", long);
-  url.searchParams.set("current_weather", "true");
-  url.searchParams.set("timezone", tz);
-
-  const resp = await fetch(url);
-  const result = await resp.json();
-
-  const { time, temperature } = result.current_weather;
-  const weather = {
-    temperature: temperature,
-    time: new Date(time),
-  };
+  const weather = await weatherProvider.getCurrentWeatherByCoordinates(
+    lat,
+    long,
+  );
   const location = city ?? `${lat} ${long}`;
   console.log(
     `Current weather in ${location}: ${weather.temperature} °C (time: ${weather.time})`,
